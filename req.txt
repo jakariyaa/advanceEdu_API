@@ -1,0 +1,45 @@
+Tech Stack
+• Runtime: Bun
+• Node.js
+• Express.js
+• Database: PostgreSQL (Prisma ORM)
+• Payment Gateway: Stripe (test mode)
+• Deployment: Vercel Serverless
+
+Task Requirements
+1. REST API Development
+Build a RESTful backend for a simple e-commerce or subscription system.
+• User registration and login (JWT authentication)
+• Get logged-in user profile
+• Create and list products or plans
+• Create order and initiate payment
+• Handle payment success/failure via webhook
+
+2. Payment Integration
+• Integrate a payment gateway (Stripe test mode)
+• Implement payment intent or checkout session
+• Handle webhooks and update order status
+• Use environment variables for credentials
+
+3. Postman Documentation
+• Share a Postman collection with all endpoints
+• JWT authorization setup
+• Sample request and response data
+
+4. Deployment Documentation
+• Provide live API base URL and webhook endpoint
+• Proper CORS and error handling setup
+
+5. Code Quality
+
+• Clean project structure
+• Centralized error handling
+• Readable and maintainable code
+
+
+MUST FOLLOW Criteria
+• REST API design and best practices
+• Authentication and security
+• Payment integration correctness
+• Deployment quality
+• Documentation and code quality
