@@ -1,7 +1,7 @@
 {
-  "name": "advanceedu-solutions",
-  "version": "1.0.0",
-  "description": "Production-ready REST API for e-commerce/subscription system with Stripe integration",
+  "name": "advanceedu-ecommerce-api",
+  "version": "1.0.1-alpha",
+  "description": "Production-ready REST API for AdvanceEdu E-commerce Platform with Stripe integration",
   "type": "module",
   "main": "dist/server.js",
   "scripts": {
@@ -11,13 +11,14 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "db:generate": "prisma generate",
+    "db:generate": "prisma generate && ./scripts/disable-typecheck-generated.sh",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "openapi:generate": "tsx src/docs/openapi.ts > openapi.json"
   },
   "keywords": [
     "express",
@@ -29,20 +30,25 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
     "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "express": "^5.2.1",
     "express-rate-limit": "^8.2.1",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
+    "pg": "^8.17.1",
     "pino": "^10.2.0",
     "pino-http": "^11.0.0",
     "stripe": "^20.1.2",
-    "zod": "^4.3.5"
+    "zod": "^4.3.5",
+    "zod-openapi": "^5.4.6"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
+    "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
@@ -64,5 +70,8 @@
   },
   "engines": {
     "node": ">=20.0.0"
+  },
+  "overrides": {
+    "hono": "^4.11.3"
   }
 }
