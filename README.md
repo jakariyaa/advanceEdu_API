@@ -357,3 +357,9 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 (Diagram placeholder)
 
+
+
+### Authentication
+
+Use Bearer token for API access.
+
