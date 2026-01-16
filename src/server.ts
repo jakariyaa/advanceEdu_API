@@ -1,20 +1,41 @@
 import app from './app';
 import { logger } from './common/lib/logger';
-import dotenv from 'dotenv';
+import { databaseService } from './common/services/database.service';
+import { env } from './common/lib/env';
 
-dotenv.config();
+const PORT = env.PORT;
 
-const PORT = process.env['PORT'] || 4000;
+async function bootstrap(): Promise<void> {
+    try {
+        await databaseService.connect();
 
-const server = app.listen(PORT, () => {
-    logger.info(`Server running on port ${PORT}`);
-});
+        const server = app.listen(PORT, () => {
+            logger.info(`Server running on port ${PORT}`);
+        });
 
-process.on('SIGTERM', () => {
-    logger.info('SIGTERM signal received: closing HTTP server');
-    server.close(() => {
-        logger.info('HTTP server closed');
-    });
-});
+        process.on('SIGTERM', async () => {
+            logger.info('SIGTERM signal received: closing HTTP server');
+            server.close(async () => {
+                await databaseService.disconnect();
+                logger.info('HTTP server closed');
+                process.exit(0);
+            });
+        });
 
-export default server;
+        process.on('SIGINT', async () => {
+            logger.info('SIGINT signal received: closing HTTP server');
+            server.close(async () => {
+                await databaseService.disconnect();
+                logger.info('HTTP server closed');
+                process.exit(0);
+            });
+        });
+    } catch (error) {
+        logger.fatal({ err: error }, 'Failed to start server');
+        process.exit(1);
+    }
+}
+
+bootstrap();
+
+// Integrated logger middleware
