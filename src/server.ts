@@ -39,3 +39,5 @@ async function bootstrap(): Promise<void> {
 bootstrap();
 
 // Integrated logger middleware
+
+// Cleaned up logs
