@@ -8,3 +8,5 @@ export const createOrderSchema = z.object({
         })).min(1),
     }),
 });
+
+// Enforce enum validation
