@@ -3,8 +3,8 @@ import request from 'supertest';
 import app from '../../../src/app';
 import { prisma } from '../../../src/common/lib/prisma';
 import { stripe } from '../../../src/common/lib/stripe';
-import { mockDeep, DeepMockProxy } from 'vitest-mock-extended';
-import { PrismaClient } from '@prisma/client';
+import { DeepMockProxy } from 'vitest-mock-extended';
+import { PrismaClient } from '../../../src/generated/prisma/client';
 import jwt from 'jsonwebtoken';
 
 vi.mock('../../../src/common/lib/prisma', async () => {
@@ -15,7 +15,7 @@ vi.mock('../../../src/common/lib/prisma', async () => {
     };
 });
 
-// Mock Stripe
+
 vi.mock('../../../src/common/lib/stripe', () => ({
     stripe: {
         checkout: {
@@ -30,16 +30,16 @@ const prismaMock = prisma as unknown as DeepMockProxy<PrismaClient>;
 
 describe('Order Endpoints', () => {
     let token: string;
+    const testJwtSecret = 'test-secret-min-32-chars-for-security';
 
     beforeEach(() => {
         vi.clearAllMocks();
-        process.env.JWT_SECRET = 'test-secret';
-        process.env.API_BASE_URL = 'http://test.com';
-        token = jwt.sign({ userId: 1, email: 'user@example.com' }, 'test-secret');
+
+        token = jwt.sign({ userId: 1, email: 'user@example.com', role: 'USER', type: 'access' }, testJwtSecret);
     });
 
     describe('POST /api/orders', () => {
-        it('should create order and checkout session', async () => {
+        it('should_create_order_and_checkout_session', async () => {
             const orderInput = {
                 items: [
                     { productId: 1, quantity: 2 },
@@ -53,7 +53,7 @@ describe('Order Endpoints', () => {
             prismaMock.product.findUnique.mockResolvedValue(product as never);
             prismaMock.product.findMany.mockResolvedValue([product] as never);
 
-            // Order creation mock
+
             prismaMock.order.create.mockResolvedValue({
                 id: 1,
                 userId: 1,
@@ -70,7 +70,7 @@ describe('Order Endpoints', () => {
 
             prismaMock.order.update.mockResolvedValue({} as never);
 
-            // Stripe session mock
+
             (stripe.checkout.sessions.create as ReturnType<typeof vi.fn>).mockResolvedValue({
                 id: 'cs_test_123',
                 url: 'https://checkout.stripe.com/test',
@@ -88,7 +88,7 @@ describe('Order Endpoints', () => {
             expect(prismaMock.order.create).toHaveBeenCalled();
         });
 
-        it('should return 400 for invalid/inactive product', async () => {
+        it('should_return_400_for_invalid_or_inactive_product', async () => {
             const orderInput = {
                 items: [
                     { productId: 999, quantity: 1 },
@@ -109,7 +109,7 @@ describe('Order Endpoints', () => {
             expect(res.body.message).toContain('invalid or inactive');
         });
 
-        it('should return 401 without auth token', async () => {
+        it('should_return_401_without_auth_token', async () => {
             const res = await request(app)
                 .post('/api/orders')
                 .send({ items: [{ productId: 1, quantity: 1 }] });
@@ -117,7 +117,7 @@ describe('Order Endpoints', () => {
             expect(res.status).toBe(401);
         });
 
-        it('should return 400 for invalid input', async () => {
+        it('should_return_400_for_invalid_input', async () => {
             const res = await request(app)
                 .post('/api/orders')
                 .set('Authorization', `Bearer ${token}`)
@@ -127,3 +127,5 @@ describe('Order Endpoints', () => {
         });
     });
 });
+
+// Integration tests for order creation
