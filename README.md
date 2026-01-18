@@ -363,3 +363,10 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 Use Bearer token for API access.
 
+
+
+## Setup
+
+1. Copy .env.example to .env
+2. npm install
+
