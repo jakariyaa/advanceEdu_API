@@ -1,6 +1,6 @@
 {
   "name": "advanceedu-ecommerce-api",
-  "version": "1.0.1-alpha",
+  "version": "1.0.1",
   "description": "Production-ready REST API for AdvanceEdu E-commerce Platform with Stripe integration",
   "type": "module",
   "main": "dist/server.js",
