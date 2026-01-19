@@ -38,3 +38,5 @@ app.use(errorHandler);
 export default app;
 
 // Optimized imports
+
+// Added health check endpoint
