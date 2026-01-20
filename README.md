@@ -370,3 +370,9 @@ Use Bearer token for API access.
 1. Copy .env.example to .env
 2. npm install
 
+
+
+### Health Check
+
+GET /health
+
