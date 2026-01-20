@@ -13,6 +13,7 @@ export const getMe = asyncHandler(async (req: Request, res: Response) => {
     const result = await userService.getUserProfile(req.user.userId);
     res.status(200).json({
         status: 'success',
+        message: 'User profile retrieved successfully',
         data: result,
     });
 });

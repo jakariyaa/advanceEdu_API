@@ -13,6 +13,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     const result = await orderService.createOrder(req.user.userId, req.body);
     res.status(201).json({
         status: 'success',
+        message: 'Order created successfully',
         data: result,
     });
 });

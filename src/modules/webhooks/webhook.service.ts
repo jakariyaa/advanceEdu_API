@@ -1,8 +1,10 @@
 import { stripe } from '../../common/lib/stripe';
 import { prisma } from '../../common/lib/prisma';
 import Stripe from 'stripe';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus } from '../../generated/prisma/client';
 import { logger } from '../../common/lib/logger';
+
+import { env } from '../../common/lib/env';
 
 export class WebhookService {
     async handleStripeEvent(signature: string, payload: Buffer) {
@@ -12,7 +14,7 @@ export class WebhookService {
             event = stripe.webhooks.constructEvent(
                 payload,
                 signature,
-                process.env['STRIPE_WEBHOOK_SECRET']!
+                env.STRIPE_WEBHOOK_SECRET
             );
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : 'Unknown error';
