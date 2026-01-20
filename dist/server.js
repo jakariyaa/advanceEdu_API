@@ -1342,8 +1342,19 @@ var handleStripeWebhook = async (req, res) => {
     res.status(400).send("Missing stripe-signature header");
     return;
   }
+  let rawBody;
+  if (Buffer.isBuffer(req.body)) {
+    rawBody = req.body;
+  } else if (typeof req.body === "object") {
+    rawBody = Buffer.from(JSON.stringify(req.body));
+  } else if (typeof req.body === "string") {
+    rawBody = Buffer.from(req.body);
+  } else {
+    res.status(400).send("Unable to parse request body");
+    return;
+  }
   try {
-    await webhookService.handleStripeEvent(signature, req.body);
+    await webhookService.handleStripeEvent(signature, rawBody);
     res.json({ received: true });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
@@ -1412,6 +1423,20 @@ app.use("/api/webhooks", express.raw({ type: "application/json" }), webhook_rout
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/api", csrfProtection, routes_default);
+app.get("/", (_req, res) => {
+  res.status(200).json({
+    message: "Welcome to AdvanceEdu E-commerce API",
+    version: "1.0.0",
+    docs: "/api/health",
+    endpoints: {
+      health: "/api/health",
+      auth: "/api/auth",
+      users: "/api/users",
+      products: "/api/products",
+      orders: "/api/orders"
+    }
+  });
+});
 app.use(errorHandler);
 var app_default = app;
 
