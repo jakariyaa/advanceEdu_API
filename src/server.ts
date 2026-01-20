@@ -36,8 +36,10 @@ async function bootstrap(): Promise<void> {
     }
 }
 
-bootstrap();
+// Only start the server when running locally (not in serverless environment)
+if (!process.env['VERCEL']) {
+    bootstrap();
+}
 
-// Integrated logger middleware
-
-// Cleaned up logs
+// Export the app for Vercel serverless functions
+export default app;
