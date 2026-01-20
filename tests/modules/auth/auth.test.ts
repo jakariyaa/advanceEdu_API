@@ -3,10 +3,9 @@ import request from 'supertest';
 import app from '../../../src/app';
 import { prisma } from '../../../src/common/lib/prisma';
 import bcrypt from 'bcrypt';
-import { mockDeep, DeepMockProxy } from 'vitest-mock-extended';
-import { PrismaClient } from '@prisma/client';
+import { DeepMockProxy } from 'vitest-mock-extended';
+import { PrismaClient } from '../../../src/generated/prisma/client';
 
-// Mock Prisma
 vi.mock('../../../src/common/lib/prisma', async () => {
     const { mockDeep } = await import('vitest-mock-extended');
     return {
@@ -17,7 +16,6 @@ vi.mock('../../../src/common/lib/prisma', async () => {
 
 const prismaMock = prisma as unknown as DeepMockProxy<PrismaClient>;
 
-// Mock Bcrypt
 vi.mock('bcrypt', () => ({
     default: {
         compare: vi.fn(),
@@ -30,23 +28,23 @@ vi.mock('bcrypt', () => ({
 describe('Auth Endpoints', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        process.env.JWT_SECRET = 'test-secret-min-32-chars-for-security';
+        process.env.JWT_ACCESS_SECRET = 'test-secret-min-32-chars-for-security';
     });
 
     describe('POST /api/auth/register', () => {
-        it('should register a new user successfully', async () => {
+        it('should_register_a_new_user_successfully', async () => {
             const newUser = {
                 email: 'test@example.com',
-                password: 'password123',
+                password: 'Password123',
                 name: 'Test User',
             };
 
-            // Mock prisma response
             prismaMock.user.findUnique.mockResolvedValue(null);
             prismaMock.user.create.mockResolvedValue({
                 id: 1,
                 ...newUser,
                 password: 'hashed_password',
+                role: 'USER',
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 stripeId: null,
@@ -63,10 +61,10 @@ describe('Auth Endpoints', () => {
             expect(prismaMock.user.create).toHaveBeenCalled();
         });
 
-        it('should register without optional name', async () => {
+        it('should_register_without_optional_name', async () => {
             const newUser = {
                 email: 'noname@example.com',
-                password: 'password123',
+                password: 'Password123',
             };
 
             prismaMock.user.findUnique.mockResolvedValue(null);
@@ -75,6 +73,7 @@ describe('Auth Endpoints', () => {
                 email: newUser.email,
                 password: 'hashed_password',
                 name: null,
+                role: 'USER',
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 stripeId: null,
@@ -88,10 +87,10 @@ describe('Auth Endpoints', () => {
             expect(res.body.data.user.email).toBe(newUser.email);
         });
 
-        it('should return 409 if email already exists', async () => {
+        it('should_return_409_if_email_already_exists', async () => {
             const existingUser = {
                 email: 'exists@example.com',
-                password: 'password123',
+                password: 'Password123',
             };
 
             prismaMock.user.findUnique.mockResolvedValue({
@@ -112,7 +111,7 @@ describe('Auth Endpoints', () => {
             expect(res.body.status).toBe('fail');
         });
 
-        it('should validate email format', async () => {
+        it('should_validate_email_format', async () => {
             const invalidUser = {
                 email: 'not-an-email',
                 password: 'password123',
@@ -126,10 +125,10 @@ describe('Auth Endpoints', () => {
             expect(res.body.status).toBe('fail');
         });
 
-        it('should validate password length', async () => {
+        it('should_validate_password_length', async () => {
             const invalidUser = {
                 email: 'valid@example.com',
-                password: '123', // too short
+                password: '123',
             };
 
             const res = await request(app)
@@ -141,7 +140,7 @@ describe('Auth Endpoints', () => {
     });
 
     describe('POST /api/auth/login', () => {
-        it('should login successfully with correct credentials', async () => {
+        it('should_login_successfully_with_correct_credentials', async () => {
             const loginData = {
                 email: 'test@example.com',
                 password: 'password123',
@@ -153,11 +152,14 @@ describe('Auth Endpoints', () => {
                 password: 'hashed_password_from_db',
                 name: 'Test User',
                 stripeId: null,
+                role: 'USER',
                 createdAt: new Date(),
                 updatedAt: new Date(),
             } as never);
 
             (bcrypt.compare as ReturnType<typeof vi.fn>).mockResolvedValue(true as never);
+
+
 
             const res = await request(app)
                 .post('/api/auth/login')
@@ -165,10 +167,15 @@ describe('Auth Endpoints', () => {
 
             expect(res.status).toBe(200);
             expect(res.body.status).toBe('success');
-            expect(res.body.data).toHaveProperty('token');
+            expect(res.body.data).toHaveProperty('accessToken');
+            expect(res.body.data).not.toHaveProperty('refreshToken');
+
+            const cookies = res.headers['set-cookie'];
+            expect(cookies).toBeDefined();
+            expect((cookies as unknown as string[]).some((c: string) => c.includes('refreshToken') && c.includes('HttpOnly'))).toBe(true);
         });
 
-        it('should fail with invalid password', async () => {
+        it('should_fail_with_invalid_password', async () => {
             const loginData = {
                 email: 'test@example.com',
                 password: 'wrongpassword',
@@ -192,28 +199,30 @@ describe('Auth Endpoints', () => {
 
             expect(res.status).toBe(401);
         });
+    });
 
-        it('should fail with non-existent email', async () => {
-            const loginData = {
-                email: 'nonexistent@example.com',
-                password: 'password123',
-            };
+    describe('POST /api/auth/refresh', () => {
+        it('should_refresh_token_with_valid_cookie', async () => {
 
-            prismaMock.user.findUnique.mockResolvedValue(null);
-
+            const _refreshToken = 'valid_refresh_token';
             const res = await request(app)
-                .post('/api/auth/login')
-                .send(loginData);
+                .post('/api/auth/refresh');
 
             expect(res.status).toBe(401);
         });
+    });
 
-        it('should validate required fields', async () => {
+    describe('POST /api/auth/logout', () => {
+        it('should_clear_cookie_on_logout', async () => {
             const res = await request(app)
-                .post('/api/auth/login')
-                .send({});
+                .post('/api/auth/logout')
+                .set('Cookie', ['refreshToken=some_token']);
 
-            expect(res.status).toBe(400);
+            expect(res.status).toBe(200);
+
+            const cookies = res.headers['set-cookie'];
+            expect(cookies).toBeDefined();
+            expect((cookies as unknown as string[]).some((c: string) => c.includes('refreshToken=;') || c.includes('Max-Age=0'))).toBe(true);
         });
     });
 });

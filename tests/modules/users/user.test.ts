@@ -1,12 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import request from 'supertest';
 import app from '../../../src/app';
 import { prisma } from '../../../src/common/lib/prisma';
-import { mockDeep, DeepMockProxy } from 'vitest-mock-extended';
-import { PrismaClient } from '@prisma/client';
+import { DeepMockProxy } from 'vitest-mock-extended';
+import { PrismaClient } from '../../../src/generated/prisma/client';
 import jwt from 'jsonwebtoken';
 
-// Mock Prisma
 vi.mock('../../../src/common/lib/prisma', async () => {
     const { mockDeep } = await import('vitest-mock-extended');
     return {
@@ -19,15 +19,16 @@ const prismaMock = prisma as unknown as DeepMockProxy<PrismaClient>;
 
 describe('User Endpoints', () => {
     let token: string;
+    const testJwtSecret = 'test-secret-min-32-chars-for-security';
 
     beforeEach(() => {
         vi.clearAllMocks();
-        process.env.JWT_SECRET = 'test-secret';
-        token = jwt.sign({ userId: 1, email: 'test@example.com' }, 'test-secret');
+
+        token = jwt.sign({ userId: 1, email: 'test@example.com', role: 'USER', type: 'access' }, testJwtSecret);
     });
 
     describe('GET /api/users/me', () => {
-        it('should return current user profile', async () => {
+        it('should_return_current_user_profile', async () => {
             const user = {
                 id: 1,
                 email: 'test@example.com',
@@ -51,14 +52,14 @@ describe('User Endpoints', () => {
             expect(res.body.data.user).not.toHaveProperty('password');
         });
 
-        it('should return 401 if unauthorized', async () => {
+        it('should_return_401_if_unauthorized', async () => {
             const res = await request(app)
                 .get('/api/users/me');
 
             expect(res.status).toBe(401);
         });
 
-        it('should return 401 if user not found', async () => {
+        it('should_return_401_if_user_not_found', async () => {
             prismaMock.user.findUnique.mockResolvedValue(null);
 
             const res = await request(app)
