@@ -149,6 +149,21 @@ Server runs at `http://localhost:3000`
 | POST | `/auth/logout` | Logout current session | ❌ |
 | POST | `/auth/logout-all` | Logout all sessions | ✅ |
 
+### CSRF Protection (Production Only)
+
+In **production**, all state-changing requests (POST, PUT, PATCH, DELETE) require a CSRF token, **except** for auth routes (`/auth/*`).
+
+**How it works:**
+1. Make any GET request to receive a `csrf-token` cookie
+2. Read the cookie value (not HttpOnly, accessible via JavaScript)
+3. Include it in the `x-csrf-token` header for state-changing requests
+
+| Header | Value | Required |
+|--------|-------|----------|
+| `x-csrf-token` | Value from `csrf-token` cookie | Production only |
+
+> **Note:** CSRF protection is disabled in development (`NODE_ENV=development`).
+
 ### Users
 
 | Method | Endpoint | Description | Auth |

@@ -2,7 +2,7 @@
     "info": {
         "_postman_id": "advanceedu-api-collection-v1",
         "name": "AdvanceEdu E-commerce API",
-        "description": "Production-ready REST API for e-commerce platform with secure authentication, role-based access control, and Stripe payment integration.\n\n## Getting Started\n\n1. **Import this collection** into Postman\n2. **Set environment variables** (see Variables tab)\n3. **Run \"Health Check\"** to verify connectivity\n4. **Register and Login** to get authentication tokens\n\n## Authentication Flow\n\n- **Login** automatically saves `accessToken` to collection variables\n- **Refresh Token** is stored in HttpOnly cookie (handled automatically)\n- Authenticated requests use Bearer token from `{{accessToken}}`\n\n## Environment Setup\n\nSet these variables before running:\n- `baseUrl` - API base URL (default: http://localhost:3000)\n- `accessToken` - Set automatically after login\n\n## Folder Structure\n\n- **Health** - API health check\n- **Auth** - Registration, login, token refresh, logout\n- **Users** - User profile operations\n- **Products** - Product CRUD operations\n- **Orders** - Order creation with Stripe checkout\n- **Payments** - Payment callbacks\n- **Webhooks** - Stripe webhook endpoint",
+        "description": "Production-ready REST API for e-commerce platform with secure authentication, role-based access control, and Stripe payment integration.\n\n## Getting Started\n\n1. **Import this collection** into Postman\n2. **Set environment variables** (see Variables tab)\n3. **Run \"Health Check\"** to verify connectivity\n4. **Register and Login** to get authentication tokens\n\n## Authentication Flow\n\n- **Login** automatically saves `accessToken` to collection variables\n- **Refresh Token** is stored in HttpOnly cookie (handled automatically)\n- Authenticated requests use Bearer token from `{{accessToken}}`\n\n## CSRF Protection (Production Only)\n\nIn **production** (`NODE_ENV=production`), state-changing requests (POST/PUT/PATCH/DELETE) require a CSRF token:\n\n1. Make any GET request to receive a `csrf-token` cookie\n2. Copy the cookie value\n3. Add header: `x-csrf-token: <cookie-value>`\n\n**Exempt routes:** All `/auth/*` endpoints (login, register, refresh, logout)\n\n**Note:** CSRF is disabled in development mode for easier testing.\n\n## Environment Setup\n\nSet these variables before running:\n- `baseUrl` - API base URL (default: http://localhost:3000)\n- `accessToken` - Set automatically after login\n\n## Folder Structure\n\n- **Health** - API health check\n- **Auth** - Registration, login, token refresh, logout\n- **Users** - User profile operations\n- **Products** - Product CRUD operations\n- **Orders** - Order creation with Stripe checkout\n- **Payments** - Payment callbacks\n- **Webhooks** - Stripe webhook endpoint",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
         "version": "1.0.0"
     },
@@ -74,7 +74,7 @@
             "description": "API health and status endpoints",
             "item": [
                 {
-                    "name": "Health Check",
+                    "name": "Health Check (Public)",
                     "event": [
                         {
                             "listen": "test",
@@ -144,7 +144,7 @@
             "description": "Authentication endpoints for user registration, login, token refresh, and logout.",
             "item": [
                 {
-                    "name": "Register",
+                    "name": "Register (Public)",
                     "event": [
                         {
                             "listen": "test",
@@ -295,7 +295,7 @@
                     ]
                 },
                 {
-                    "name": "Login",
+                    "name": "Login (Public)",
                     "event": [
                         {
                             "listen": "test",
@@ -422,7 +422,7 @@
                     ]
                 },
                 {
-                    "name": "Refresh Token",
+                    "name": "Refresh Token (Cookie)",
                     "event": [
                         {
                             "listen": "test",
@@ -517,7 +517,7 @@
                     ]
                 },
                 {
-                    "name": "Logout",
+                    "name": "Logout (Cookie)",
                     "event": [
                         {
                             "listen": "test",
@@ -587,7 +587,7 @@
                     ]
                 },
                 {
-                    "name": "Logout All Sessions",
+                    "name": "Logout All Sessions (Auth)",
                     "event": [
                         {
                             "listen": "test",
@@ -660,7 +660,7 @@
             "description": "User profile operations",
             "item": [
                 {
-                    "name": "Get Current User",
+                    "name": "Get Current User (Auth)",
                     "event": [
                         {
                             "listen": "test",
@@ -757,7 +757,7 @@
             "description": "Product management endpoints. Public read access, authenticated write access.",
             "item": [
                 {
-                    "name": "List Products",
+                    "name": "List Products (Public)",
                     "event": [
                         {
                             "listen": "test",
@@ -855,7 +855,7 @@
                     ]
                 },
                 {
-                    "name": "Get Product by ID",
+                    "name": "Get Product by ID (Public)",
                     "event": [
                         {
                             "listen": "test",
@@ -951,7 +951,7 @@
                     ]
                 },
                 {
-                    "name": "Create Product",
+                    "name": "Create Product (Auth)",
                     "event": [
                         {
                             "listen": "test",
@@ -1066,7 +1066,7 @@
                     ]
                 },
                 {
-                    "name": "Update Product",
+                    "name": "Update Product (Auth)",
                     "event": [
                         {
                             "listen": "test",
@@ -1153,7 +1153,7 @@
                     ]
                 },
                 {
-                    "name": "Delete Product",
+                    "name": "Delete Product (Admin)",
                     "event": [
                         {
                             "listen": "test",
@@ -1244,7 +1244,7 @@
             "description": "Order management with Stripe Checkout integration.",
             "item": [
                 {
-                    "name": "Create Order",
+                    "name": "Create Order (Auth)",
                     "event": [
                         {
                             "listen": "test",
@@ -1394,7 +1394,7 @@
             "description": "Payment callback endpoints for Stripe redirect handling.",
             "item": [
                 {
-                    "name": "Payment Success",
+                    "name": "Payment Success (Public)",
                     "event": [
                         {
                             "listen": "test",
@@ -1453,7 +1453,7 @@
                     ]
                 },
                 {
-                    "name": "Payment Cancel",
+                    "name": "Payment Cancel (Public)",
                     "event": [
                         {
                             "listen": "test",
@@ -1518,7 +1518,7 @@
             "description": "Webhook endpoints for external service integration.",
             "item": [
                 {
-                    "name": "Stripe Webhook",
+                    "name": "Stripe Webhook (Signature)",
                     "request": {
                         "auth": {
                             "type": "noauth"
