@@ -1,888 +1,41 @@
 {
     "info": {
-        "_postman_id": "advanceedu-solutions-api",
-        "name": "AdvanceEdu Solutions API",
-        "description": "Production-ready REST API for e-commerce/subscription system with Stripe integration.\n\n## Setup\n1. Import this collection into Postman\n2. Create an environment with variables:\n   - `baseUrl`: `http://localhost:3000` (or your deployed URL)\n   - `token`: (leave empty, auto-set after login)\n\n## Quick Start\n1. Register a user with POST /auth/register\n2. Login with POST /auth/login (token is auto-set)\n3. Create products with POST /products\n4. Create orders with POST /orders (returns Stripe checkout URL)\n\n## Webhook Testing\nUse Stripe CLI: `stripe listen --forward-to localhost:3000/api/webhooks/stripe`",
-        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+        "_postman_id": "advanceedu-api-collection-v1",
+        "name": "AdvanceEdu E-commerce API",
+        "description": "Production-ready REST API for e-commerce platform with secure authentication, role-based access control, and Stripe payment integration.\n\n## Getting Started\n\n1. **Import this collection** into Postman\n2. **Set environment variables** (see Variables tab)\n3. **Run \"Health Check\"** to verify connectivity\n4. **Register and Login** to get authentication tokens\n\n## Authentication Flow\n\n- **Login** automatically saves `accessToken` to collection variables\n- **Refresh Token** is stored in HttpOnly cookie (handled automatically)\n- Authenticated requests use Bearer token from `{{accessToken}}`\n\n## Environment Setup\n\nSet these variables before running:\n- `baseUrl` - API base URL (default: http://localhost:3000)\n- `accessToken` - Set automatically after login\n\n## Folder Structure\n\n- **Health** - API health check\n- **Auth** - Registration, login, token refresh, logout\n- **Users** - User profile operations\n- **Products** - Product CRUD operations\n- **Orders** - Order creation with Stripe checkout\n- **Payments** - Payment callbacks\n- **Webhooks** - Stripe webhook endpoint",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "version": "1.0.0"
     },
     "variable": [
         {
             "key": "baseUrl",
             "value": "http://localhost:3000",
-            "type": "string"
+            "type": "string",
+            "description": "API base URL"
         },
         {
-            "key": "token",
+            "key": "accessToken",
             "value": "",
-            "type": "string"
-        }
-    ],
-    "item": [
-        {
-            "name": "Health Check",
-            "item": [
-                {
-                    "name": "Health Check",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{baseUrl}}/api/health",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "api",
-                                "health"
-                            ]
-                        },
-                        "description": "Check if the API is running and healthy."
-                    },
-                    "response": [
-                        {
-                            "name": "Success",
-                            "originalRequest": {
-                                "method": "GET",
-                                "url": {
-                                    "raw": "{{baseUrl}}/api/health",
-                                    "host": [
-                                        "{{baseUrl}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "health"
-                                    ]
-                                }
-                            },
-                            "status": "OK",
-                            "code": 200,
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"status\": \"ok\",\n  \"timestamp\": \"2026-01-15T13:45:00.000Z\"\n}"
-                        }
-                    ]
-                }
-            ]
+            "type": "string",
+            "description": "JWT access token (auto-populated after login)"
         },
         {
-            "name": "Auth",
-            "item": [
-                {
-                    "name": "Register User",
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "if (pm.response.code === 201) {",
-                                    "    var jsonData = pm.response.json();",
-                                    "    console.log('User registered successfully:', jsonData.data.user.email);",
-                                    "}"
-                                ],
-                                "type": "text/javascript"
-                            }
-                        }
-                    ],
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"securePassword123\",\n  \"name\": \"John Doe\"\n}"
-                        },
-                        "url": {
-                            "raw": "{{baseUrl}}/api/auth/register",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "api",
-                                "auth",
-                                "register"
-                            ]
-                        },
-                        "description": "Register a new user account.\n\n**Request Body:**\n- `email` (required): Valid email address\n- `password` (required): Minimum 8 characters\n- `name` (optional): User's display name"
-                    },
-                    "response": [
-                        {
-                            "name": "Success - User Created",
-                            "originalRequest": {
-                                "method": "POST",
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"securePassword123\",\n  \"name\": \"John Doe\"\n}"
-                                },
-                                "url": {
-                                    "raw": "{{baseUrl}}/api/auth/register",
-                                    "host": [
-                                        "{{baseUrl}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "auth",
-                                        "register"
-                                    ]
-                                }
-                            },
-                            "status": "Created",
-                            "code": 201,
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"status\": \"success\",\n  \"data\": {\n    \"user\": {\n      \"id\": 1,\n      \"email\": \"user@example.com\",\n      \"name\": \"John Doe\",\n      \"stripeId\": null,\n      \"createdAt\": \"2026-01-15T13:45:00.000Z\",\n      \"updatedAt\": \"2026-01-15T13:45:00.000Z\"\n    }\n  }\n}"
-                        },
-                        {
-                            "name": "Error - Email Already Exists",
-                            "originalRequest": {
-                                "method": "POST",
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n  \"email\": \"existing@example.com\",\n  \"password\": \"password123\"\n}"
-                                },
-                                "url": {
-                                    "raw": "{{baseUrl}}/api/auth/register",
-                                    "host": [
-                                        "{{baseUrl}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "auth",
-                                        "register"
-                                    ]
-                                }
-                            },
-                            "status": "Conflict",
-                            "code": 409,
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"status\": \"fail\",\n  \"message\": \"User already exists\"\n}"
-                        },
-                        {
-                            "name": "Error - Validation Failed",
-                            "originalRequest": {
-                                "method": "POST",
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n  \"email\": \"invalid-email\",\n  \"password\": \"123\"\n}"
-                                },
-                                "url": {
-                                    "raw": "{{baseUrl}}/api/auth/register",
-                                    "host": [
-                                        "{{baseUrl}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "auth",
-                                        "register"
-                                    ]
-                                }
-                            },
-                            "status": "Bad Request",
-                            "code": 400,
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Validation Error\",\n  \"errors\": [\n    {\n      \"code\": \"invalid_string\",\n      \"path\": [\"body\", \"email\"],\n      \"message\": \"Invalid email\"\n    },\n    {\n      \"code\": \"too_small\",\n      \"path\": [\"body\", \"password\"],\n      \"message\": \"String must contain at least 8 character(s)\"\n    }\n  ]\n}"
-                        }
-                    ]
-                },
-                {
-                    "name": "Login User",
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "if (pm.response.code === 200) {",
-                                    "    var jsonData = pm.response.json();",
-                                    "    pm.collectionVariables.set('token', jsonData.data.token);",
-                                    "    console.log('Login successful, token saved to collection variables');",
-                                    "}"
-                                ],
-                                "type": "text/javascript"
-                            }
-                        }
-                    ],
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"securePassword123\"\n}"
-                        },
-                        "url": {
-                            "raw": "{{baseUrl}}/api/auth/login",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "api",
-                                "auth",
-                                "login"
-                            ]
-                        },
-                        "description": "Login with email and password to receive a JWT token.\n\nThe token is automatically saved to the `token` collection variable for use in subsequent authenticated requests."
-                    },
-                    "response": [
-                        {
-                            "name": "Success - Login",
-                            "originalRequest": {
-                                "method": "POST",
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"securePassword123\"\n}"
-                                },
-                                "url": {
-                                    "raw": "{{baseUrl}}/api/auth/login",
-                                    "host": [
-                                        "{{baseUrl}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "auth",
-                                        "login"
-                                    ]
-                                }
-                            },
-                            "status": "OK",
-                            "code": 200,
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"status\": \"success\",\n  \"data\": {\n    \"user\": {\n      \"id\": 1,\n      \"email\": \"user@example.com\",\n      \"name\": \"John Doe\",\n      \"stripeId\": null,\n      \"createdAt\": \"2026-01-15T13:45:00.000Z\",\n      \"updatedAt\": \"2026-01-15T13:45:00.000Z\"\n    },\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsImlhdCI6MTcwNTMxMjMwMCwiZXhwIjoxNzA1Mzk4NzAwfQ.sample_signature\"\n  }\n}"
-                        },
-                        {
-                            "name": "Error - Invalid Credentials",
-                            "originalRequest": {
-                                "method": "POST",
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"wrongpassword\"\n}"
-                                },
-                                "url": {
-                                    "raw": "{{baseUrl}}/api/auth/login",
-                                    "host": [
-                                        "{{baseUrl}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "auth",
-                                        "login"
-                                    ]
-                                }
-                            },
-                            "status": "Unauthorized",
-                            "code": 401,
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Invalid email or password\"\n}"
-                        }
-                    ]
-                }
-            ],
-            "description": "Authentication endpoints for user registration and login."
+            "key": "testEmail",
+            "value": "test@example.com",
+            "type": "string",
+            "description": "Test user email for auth flows"
         },
         {
-            "name": "Users",
-            "item": [
-                {
-                    "name": "Get Current User Profile",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{baseUrl}}/api/users/me",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "api",
-                                "users",
-                                "me"
-                            ]
-                        },
-                        "description": "Get the profile of the currently authenticated user.\n\n**Authentication Required:** Bearer Token"
-                    },
-                    "response": [
-                        {
-                            "name": "Success - User Profile",
-                            "originalRequest": {
-                                "method": "GET",
-                                "header": [
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{token}}"
-                                    }
-                                ],
-                                "url": {
-                                    "raw": "{{baseUrl}}/api/users/me",
-                                    "host": [
-                                        "{{baseUrl}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "users",
-                                        "me"
-                                    ]
-                                }
-                            },
-                            "status": "OK",
-                            "code": 200,
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"status\": \"success\",\n  \"data\": {\n    \"user\": {\n      \"id\": 1,\n      \"email\": \"user@example.com\",\n      \"name\": \"John Doe\",\n      \"stripeId\": null,\n      \"createdAt\": \"2026-01-15T13:45:00.000Z\",\n      \"updatedAt\": \"2026-01-15T13:45:00.000Z\"\n    }\n  }\n}"
-                        },
-                        {
-                            "name": "Error - Unauthorized",
-                            "originalRequest": {
-                                "method": "GET",
-                                "url": {
-                                    "raw": "{{baseUrl}}/api/users/me",
-                                    "host": [
-                                        "{{baseUrl}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "users",
-                                        "me"
-                                    ]
-                                }
-                            },
-                            "status": "Unauthorized",
-                            "code": 401,
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Unauthorized\"\n}"
-                        }
-                    ]
-                }
-            ],
-            "description": "User management endpoints. All endpoints require authentication."
+            "key": "testPassword",
+            "value": "#Password123",
+            "type": "string",
+            "description": "Test user password"
         },
         {
-            "name": "Products",
-            "item": [
-                {
-                    "name": "List All Products",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{baseUrl}}/api/products",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "api",
-                                "products"
-                            ]
-                        },
-                        "description": "Get a list of all active products."
-                    },
-                    "response": [
-                        {
-                            "name": "Success - Product List",
-                            "originalRequest": {
-                                "method": "GET",
-                                "url": {
-                                    "raw": "{{baseUrl}}/api/products",
-                                    "host": [
-                                        "{{baseUrl}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "products"
-                                    ]
-                                }
-                            },
-                            "status": "OK",
-                            "code": 200,
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"status\": \"success\",\n  \"data\": {\n    \"products\": [\n      {\n        \"id\": 1,\n        \"name\": \"Premium Subscription\",\n        \"description\": \"Monthly premium subscription with all features\",\n        \"price\": 2999,\n        \"currency\": \"usd\",\n        \"isActive\": true,\n        \"createdAt\": \"2026-01-15T13:45:00.000Z\",\n        \"updatedAt\": \"2026-01-15T13:45:00.000Z\"\n      },\n      {\n        \"id\": 2,\n        \"name\": \"Basic Plan\",\n        \"description\": \"Entry-level plan for beginners\",\n        \"price\": 999,\n        \"currency\": \"usd\",\n        \"isActive\": true,\n        \"createdAt\": \"2026-01-15T13:45:00.000Z\",\n        \"updatedAt\": \"2026-01-15T13:45:00.000Z\"\n      }\n    ]\n  }\n}"
-                        }
-                    ]
-                },
-                {
-                    "name": "Get Product by ID",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{baseUrl}}/api/products/1",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "api",
-                                "products",
-                                "1"
-                            ]
-                        },
-                        "description": "Get a single product by its ID."
-                    },
-                    "response": [
-                        {
-                            "name": "Success - Single Product",
-                            "originalRequest": {
-                                "method": "GET",
-                                "url": {
-                                    "raw": "{{baseUrl}}/api/products/1",
-                                    "host": [
-                                        "{{baseUrl}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "products",
-                                        "1"
-                                    ]
-                                }
-                            },
-                            "status": "OK",
-                            "code": 200,
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"status\": \"success\",\n  \"data\": {\n    \"product\": {\n      \"id\": 1,\n      \"name\": \"Premium Subscription\",\n      \"description\": \"Monthly premium subscription with all features\",\n      \"price\": 2999,\n      \"currency\": \"usd\",\n      \"isActive\": true,\n      \"createdAt\": \"2026-01-15T13:45:00.000Z\",\n      \"updatedAt\": \"2026-01-15T13:45:00.000Z\"\n    }\n  }\n}"
-                        },
-                        {
-                            "name": "Error - Product Not Found",
-                            "originalRequest": {
-                                "method": "GET",
-                                "url": {
-                                    "raw": "{{baseUrl}}/api/products/999",
-                                    "host": [
-                                        "{{baseUrl}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "products",
-                                        "999"
-                                    ]
-                                }
-                            },
-                            "status": "Not Found",
-                            "code": 404,
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Product not found\"\n}"
-                        }
-                    ]
-                },
-                {
-                    "name": "Create Product",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"name\": \"Premium Subscription\",\n  \"description\": \"Monthly premium subscription with all features\",\n  \"price\": 2999,\n  \"currency\": \"usd\"\n}"
-                        },
-                        "url": {
-                            "raw": "{{baseUrl}}/api/products",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "api",
-                                "products"
-                            ]
-                        },
-                        "description": "Create a new product.\n\n**Authentication Required:** Bearer Token\n\n**Request Body:**\n- `name` (required): Product name (min 1 character)\n- `description` (optional): Product description\n- `price` (required): Price in cents (e.g., 2999 = $29.99)\n- `currency` (optional): Currency code (default: \"usd\")"
-                    },
-                    "response": [
-                        {
-                            "name": "Success - Product Created",
-                            "originalRequest": {
-                                "method": "POST",
-                                "header": [
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{token}}"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n  \"name\": \"Premium Subscription\",\n  \"description\": \"Monthly premium subscription with all features\",\n  \"price\": 2999,\n  \"currency\": \"usd\"\n}"
-                                },
-                                "url": {
-                                    "raw": "{{baseUrl}}/api/products",
-                                    "host": [
-                                        "{{baseUrl}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "products"
-                                    ]
-                                }
-                            },
-                            "status": "Created",
-                            "code": 201,
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"status\": \"success\",\n  \"data\": {\n    \"product\": {\n      \"id\": 1,\n      \"name\": \"Premium Subscription\",\n      \"description\": \"Monthly premium subscription with all features\",\n      \"price\": 2999,\n      \"currency\": \"usd\",\n      \"isActive\": true,\n      \"createdAt\": \"2026-01-15T13:45:00.000Z\",\n      \"updatedAt\": \"2026-01-15T13:45:00.000Z\"\n    }\n  }\n}"
-                        },
-                        {
-                            "name": "Error - Validation Failed",
-                            "originalRequest": {
-                                "method": "POST",
-                                "header": [
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{token}}"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n  \"name\": \"\",\n  \"price\": -100\n}"
-                                },
-                                "url": {
-                                    "raw": "{{baseUrl}}/api/products",
-                                    "host": [
-                                        "{{baseUrl}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "products"
-                                    ]
-                                }
-                            },
-                            "status": "Bad Request",
-                            "code": 400,
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Validation Error\",\n  \"errors\": [\n    {\n      \"code\": \"too_small\",\n      \"path\": [\"body\", \"name\"],\n      \"message\": \"String must contain at least 1 character(s)\"\n    },\n    {\n      \"code\": \"too_small\",\n      \"path\": [\"body\", \"price\"],\n      \"message\": \"Number must be greater than 0\"\n    }\n  ]\n}"
-                        }
-                    ]
-                }
-            ],
-            "description": "Product management endpoints. Creating products requires authentication."
-        },
-        {
-            "name": "Orders",
-            "item": [
-                {
-                    "name": "Create Order",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"items\": [\n    {\n      \"productId\": 1,\n      \"quantity\": 2\n    },\n    {\n      \"productId\": 2,\n      \"quantity\": 1\n    }\n  ]\n}"
-                        },
-                        "url": {
-                            "raw": "{{baseUrl}}/api/orders",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "api",
-                                "orders"
-                            ]
-                        },
-                        "description": "Create a new order and initiate Stripe Checkout.\n\n**Authentication Required:** Bearer Token\n\n**Request Body:**\n- `items` (required): Array of order items\n  - `productId` (required): ID of the product\n  - `quantity` (required): Number of items\n\n**Response:**\nReturns the order details and a Stripe Checkout URL. Redirect the user to this URL to complete payment."
-                    },
-                    "response": [
-                        {
-                            "name": "Success - Order Created with Checkout URL",
-                            "originalRequest": {
-                                "method": "POST",
-                                "header": [
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{token}}"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n  \"items\": [\n    {\n      \"productId\": 1,\n      \"quantity\": 2\n    }\n  ]\n}"
-                                },
-                                "url": {
-                                    "raw": "{{baseUrl}}/api/orders",
-                                    "host": [
-                                        "{{baseUrl}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "orders"
-                                    ]
-                                }
-                            },
-                            "status": "Created",
-                            "code": 201,
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"status\": \"success\",\n  \"data\": {\n    \"order\": {\n      \"id\": 1,\n      \"userId\": 1,\n      \"status\": \"PENDING\",\n      \"totalAmount\": 5998,\n      \"currency\": \"usd\",\n      \"createdAt\": \"2026-01-15T13:45:00.000Z\",\n      \"items\": [\n        {\n          \"id\": 1,\n          \"productId\": 1,\n          \"quantity\": 2,\n          \"price\": 2999,\n          \"product\": {\n            \"id\": 1,\n            \"name\": \"Premium Subscription\"\n          }\n        }\n      ]\n    },\n    \"sessionId\": \"cs_test_a1b2c3d4e5f6g7h8i9j0\",\n    \"url\": \"https://checkout.stripe.com/c/pay/cs_test_a1b2c3d4e5f6g7h8i9j0\"\n  }\n}"
-                        },
-                        {
-                            "name": "Error - Invalid Product",
-                            "originalRequest": {
-                                "method": "POST",
-                                "header": [
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{token}}"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n  \"items\": [\n    {\n      \"productId\": 999,\n      \"quantity\": 1\n    }\n  ]\n}"
-                                },
-                                "url": {
-                                    "raw": "{{baseUrl}}/api/orders",
-                                    "host": [
-                                        "{{baseUrl}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "orders"
-                                    ]
-                                }
-                            },
-                            "status": "Bad Request",
-                            "code": 400,
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Some products are invalid or inactive\"\n}"
-                        },
-                        {
-                            "name": "Error - Empty Items Array",
-                            "originalRequest": {
-                                "method": "POST",
-                                "header": [
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{token}}"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n  \"items\": []\n}"
-                                },
-                                "url": {
-                                    "raw": "{{baseUrl}}/api/orders",
-                                    "host": [
-                                        "{{baseUrl}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "orders"
-                                    ]
-                                }
-                            },
-                            "status": "Bad Request",
-                            "code": 400,
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Validation Error\",\n  \"errors\": [\n    {\n      \"code\": \"too_small\",\n      \"path\": [\"body\", \"items\"],\n      \"message\": \"Array must contain at least 1 element(s)\"\n    }\n  ]\n}"
-                        }
-                    ]
-                }
-            ],
-            "description": "Order management endpoints. All endpoints require authentication.\n\n**Order Flow:**\n1. Create order → Returns Stripe Checkout URL\n2. User completes payment on Stripe\n3. Stripe sends webhook → Order status updated to PAID"
-        },
-        {
-            "name": "Webhooks",
-            "item": [
-                {
-                    "name": "Stripe Webhook (Reference Only)",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            },
-                            {
-                                "key": "stripe-signature",
-                                "value": "t=1234567890,v1=signature_hash",
-                                "description": "Stripe signature header (auto-generated by Stripe)"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"id\": \"evt_1234567890\",\n  \"type\": \"checkout.session.completed\",\n  \"data\": {\n    \"object\": {\n      \"id\": \"cs_test_abc123\",\n      \"payment_intent\": \"pi_abc123\",\n      \"metadata\": {\n        \"orderId\": \"1\",\n        \"userId\": \"1\"\n      }\n    }\n  }\n}"
-                        },
-                        "url": {
-                            "raw": "{{baseUrl}}/api/webhooks/stripe",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "api",
-                                "webhooks",
-                                "stripe"
-                            ]
-                        },
-                        "description": "**This endpoint is for Stripe to call, not for manual testing.**\n\nStripe sends webhook events to this endpoint when payment events occur.\n\n**Handled Events:**\n- `checkout.session.completed` → Order marked as PAID\n- `checkout.session.expired` → Order marked as CANCELLED\n\n**Testing Webhooks:**\nUse Stripe CLI to forward events locally:\n```bash\nstripe listen --forward-to localhost:3000/api/webhooks/stripe\n```\n\n**Security:**\nThe webhook signature is verified using `STRIPE_WEBHOOK_SECRET` environment variable."
-                    },
-                    "response": [
-                        {
-                            "name": "Success - Event Received",
-                            "originalRequest": {
-                                "method": "POST",
-                                "url": {
-                                    "raw": "{{baseUrl}}/api/webhooks/stripe",
-                                    "host": [
-                                        "{{baseUrl}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "webhooks",
-                                        "stripe"
-                                    ]
-                                }
-                            },
-                            "status": "OK",
-                            "code": 200,
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"received\": true\n}"
-                        },
-                        {
-                            "name": "Error - Invalid Signature",
-                            "originalRequest": {
-                                "method": "POST",
-                                "url": {
-                                    "raw": "{{baseUrl}}/api/webhooks/stripe",
-                                    "host": [
-                                        "{{baseUrl}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "webhooks",
-                                        "stripe"
-                                    ]
-                                }
-                            },
-                            "status": "Bad Request",
-                            "code": 400,
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "text/plain"
-                                }
-                            ],
-                            "body": "Webhook Error: Invalid signature"
-                        }
-                    ]
-                }
-            ],
-            "description": "Webhook endpoints for external services.\n\n**Note:** These endpoints are called by external services (Stripe), not by your application."
+            "key": "productId",
+            "value": "1",
+            "type": "string",
+            "description": "Product ID for testing (auto-populated after create)"
         }
     ],
     "auth": {
@@ -890,7 +43,7 @@
         "bearer": [
             {
                 "key": "token",
-                "value": "{{token}}",
+                "value": "{{accessToken}}",
                 "type": "string"
             }
         ]
@@ -913,6 +66,1531 @@
                     ""
                 ]
             }
+        }
+    ],
+    "item": [
+        {
+            "name": "Health",
+            "description": "API health and status endpoints",
+            "item": [
+                {
+                    "name": "Health Check",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has ok status', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.status).to.eql('ok');",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has timestamp', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.timestamp).to.be.a('string');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/health",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "health"
+                            ]
+                        },
+                        "description": "Check if the API is running and healthy. Returns status and server timestamp."
+                    },
+                    "response": [
+                        {
+                            "name": "Healthy Response",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/health",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "health"
+                                    ]
+                                }
+                            },
+                            "status": "OK",
+                            "code": 200,
+                            "_postman_previewlanguage": "json",
+                            "body": "{\n  \"status\": \"ok\",\n  \"timestamp\": \"2026-01-20T12:00:00.000Z\"\n}"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Auth",
+            "description": "Authentication endpoints for user registration, login, token refresh, and logout.",
+            "item": [
+                {
+                    "name": "Register",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 201', function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response indicates success', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.status).to.eql('success');",
+                                    "});",
+                                    "",
+                                    "pm.test('User data is returned', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data.user).to.have.property('id');",
+                                    "    pm.expect(jsonData.data.user).to.have.property('email');",
+                                    "    pm.expect(jsonData.data.user).to.have.property('role');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\",\n  \"name\": \"Test User\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/auth/register",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "description": "Register a new user account.\n\n**Request Body:**\n- `email` (required): Valid email address\n- `password` (required): Minimum 8 characters\n- `name` (optional): User's display name (min 2 characters)"
+                    },
+                    "response": [
+                        {
+                            "name": "Registration Successful",
+                            "originalRequest": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"email\": \"newuser@example.com\",\n  \"password\": \"securepass123\",\n  \"name\": \"New User\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/auth/register",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "auth",
+                                        "register"
+                                    ]
+                                }
+                            },
+                            "status": "Created",
+                            "code": 201,
+                            "_postman_previewlanguage": "json",
+                            "body": "{\n  \"status\": \"success\",\n  \"message\": \"User registered successfully\",\n  \"data\": {\n    \"user\": {\n      \"id\": 1,\n      \"email\": \"newuser@example.com\",\n      \"name\": \"New User\",\n      \"role\": \"USER\",\n      \"createdAt\": \"2026-01-20T12:00:00.000Z\",\n      \"updatedAt\": \"2026-01-20T12:00:00.000Z\"\n    }\n  }\n}"
+                        },
+                        {
+                            "name": "Validation Error",
+                            "originalRequest": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"email\": \"invalid-email\",\n  \"password\": \"short\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/auth/register",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "auth",
+                                        "register"
+                                    ]
+                                }
+                            },
+                            "status": "Bad Request",
+                            "code": 400,
+                            "_postman_previewlanguage": "json",
+                            "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Validation failed\",\n  \"errors\": [\n    {\"field\": \"email\", \"message\": \"Invalid email format\"},\n    {\"field\": \"password\", \"message\": \"Password must be at least 8 characters\"}\n  ]\n}"
+                        },
+                        {
+                            "name": "User Already Exists",
+                            "originalRequest": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"email\": \"existing@example.com\",\n  \"password\": \"#Password123\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/auth/register",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "auth",
+                                        "register"
+                                    ]
+                                }
+                            },
+                            "status": "Conflict",
+                            "code": 409,
+                            "_postman_previewlanguage": "json",
+                            "body": "{\n  \"status\": \"fail\",\n  \"message\": \"User already exists\"\n}"
+                        }
+                    ]
+                },
+                {
+                    "name": "Login",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response indicates success', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.status).to.eql('success');",
+                                    "});",
+                                    "",
+                                    "pm.test('Access token is returned', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data.accessToken).to.be.a('string');",
+                                    "});",
+                                    "",
+                                    "// Auto-save access token to collection variable",
+                                    "if (pm.response.code === 200) {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    if (jsonData.data && jsonData.data.accessToken) {",
+                                    "        pm.collectionVariables.set('accessToken', jsonData.data.accessToken);",
+                                    "        console.log('Access token saved to collection variables');",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "description": "Authenticate user and receive access token.\n\n**Request Body:**\n- `email` (required): Registered email address\n- `password` (required): Account password\n\n**Response:**\n- Access token (JWT) for Authorization header\n- Refresh token set as HttpOnly cookie\n- Token expiration time\n\n**Note:** Access token is automatically saved to collection variables."
+                    },
+                    "response": [
+                        {
+                            "name": "Login Successful",
+                            "originalRequest": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"#Password123\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/auth/login",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "auth",
+                                        "login"
+                                    ]
+                                }
+                            },
+                            "status": "OK",
+                            "code": 200,
+                            "_postman_previewlanguage": "json",
+                            "body": "{\n  \"status\": \"success\",\n  \"message\": \"Login successful\",\n  \"data\": {\n    \"user\": {\n      \"id\": 1,\n      \"email\": \"test@example.com\",\n      \"name\": \"Test User\",\n      \"role\": \"USER\",\n      \"createdAt\": \"2026-01-20T12:00:00.000Z\",\n      \"updatedAt\": \"2026-01-20T12:00:00.000Z\"\n    },\n    \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"expiresIn\": 900\n  }\n}"
+                        },
+                        {
+                            "name": "Invalid Credentials",
+                            "originalRequest": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"wrongpassword\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/auth/login",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "auth",
+                                        "login"
+                                    ]
+                                }
+                            },
+                            "status": "Unauthorized",
+                            "code": 401,
+                            "_postman_previewlanguage": "json",
+                            "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Invalid credentials\"\n}"
+                        }
+                    ]
+                },
+                {
+                    "name": "Refresh Token",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('New access token is returned', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data.accessToken).to.be.a('string');",
+                                    "});",
+                                    "",
+                                    "// Auto-save new access token",
+                                    "if (pm.response.code === 200) {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    if (jsonData.data && jsonData.data.accessToken) {",
+                                    "        pm.collectionVariables.set('accessToken', jsonData.data.accessToken);",
+                                    "        console.log('New access token saved to collection variables');",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/auth/refresh",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "refresh"
+                            ]
+                        },
+                        "description": "Refresh the access token using the HttpOnly refresh token cookie.\n\n**Important:** This endpoint uses HttpOnly cookies for the refresh token. The browser/Postman automatically includes the cookie from the login response.\n\n**Response:**\n- New access token\n- Token expiration time\n- New refresh token cookie (rotation)"
+                    },
+                    "response": [
+                        {
+                            "name": "Token Refreshed",
+                            "originalRequest": {
+                                "method": "POST",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/auth/refresh",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "auth",
+                                        "refresh"
+                                    ]
+                                }
+                            },
+                            "status": "OK",
+                            "code": 200,
+                            "_postman_previewlanguage": "json",
+                            "body": "{\n  \"status\": \"success\",\n  \"message\": \"Token refreshed\",\n  \"data\": {\n    \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"expiresIn\": 900\n  }\n}"
+                        },
+                        {
+                            "name": "Invalid Refresh Token",
+                            "originalRequest": {
+                                "method": "POST",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/auth/refresh",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "auth",
+                                        "refresh"
+                                    ]
+                                }
+                            },
+                            "status": "Unauthorized",
+                            "code": 401,
+                            "_postman_previewlanguage": "json",
+                            "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Invalid or expired refresh token\"\n}"
+                        }
+                    ]
+                },
+                {
+                    "name": "Logout",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Logout successful', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.status).to.eql('success');",
+                                    "});",
+                                    "",
+                                    "// Clear access token on logout",
+                                    "if (pm.response.code === 200) {",
+                                    "    pm.collectionVariables.set('accessToken', '');",
+                                    "    console.log('Access token cleared from collection variables');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/auth/logout",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "logout"
+                            ]
+                        },
+                        "description": "Logout current session and invalidate the refresh token.\n\n**Note:** This clears the HttpOnly refresh token cookie and removes the access token from collection variables."
+                    },
+                    "response": [
+                        {
+                            "name": "Logout Successful",
+                            "originalRequest": {
+                                "method": "POST",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/auth/logout",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "auth",
+                                        "logout"
+                                    ]
+                                }
+                            },
+                            "status": "OK",
+                            "code": 200,
+                            "_postman_previewlanguage": "json",
+                            "body": "{\n  \"status\": \"success\",\n  \"message\": \"Logged out successfully\"\n}"
+                        }
+                    ]
+                },
+                {
+                    "name": "Logout All Sessions",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('All sessions logged out', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.status).to.eql('success');",
+                                    "});",
+                                    "",
+                                    "// Clear access token on logout",
+                                    "if (pm.response.code === 200) {",
+                                    "    pm.collectionVariables.set('accessToken', '');",
+                                    "    console.log('Access token cleared from collection variables');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/auth/logout-all",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "logout-all"
+                            ]
+                        },
+                        "description": "Logout from all sessions across all devices. Requires authentication.\n\n**Note:** This invalidates all refresh tokens for the user, logging out all active sessions."
+                    },
+                    "response": [
+                        {
+                            "name": "All Sessions Logged Out",
+                            "originalRequest": {
+                                "method": "POST",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/auth/logout-all",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "auth",
+                                        "logout-all"
+                                    ]
+                                }
+                            },
+                            "status": "OK",
+                            "code": 200,
+                            "_postman_previewlanguage": "json",
+                            "body": "{\n  \"status\": \"success\",\n  \"message\": \"All sessions logged out\"\n}"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Users",
+            "description": "User profile operations",
+            "item": [
+                {
+                    "name": "Get Current User",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('User data is returned', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.status).to.eql('success');",
+                                    "    pm.expect(jsonData.data.user).to.be.an('object');",
+                                    "});",
+                                    "",
+                                    "pm.test('User has required fields', function () {",
+                                    "    const user = pm.response.json().data.user;",
+                                    "    pm.expect(user).to.have.property('id');",
+                                    "    pm.expect(user).to.have.property('email');",
+                                    "    pm.expect(user).to.have.property('role');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/users/me",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "users",
+                                "me"
+                            ]
+                        },
+                        "description": "Get the authenticated user's profile information.\n\n**Requires:** Bearer authentication"
+                    },
+                    "response": [
+                        {
+                            "name": "User Profile",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/users/me",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "users",
+                                        "me"
+                                    ]
+                                }
+                            },
+                            "status": "OK",
+                            "code": 200,
+                            "_postman_previewlanguage": "json",
+                            "body": "{\n  \"status\": \"success\",\n  \"message\": \"User retrieved\",\n  \"data\": {\n    \"user\": {\n      \"id\": 1,\n      \"email\": \"test@example.com\",\n      \"name\": \"Test User\",\n      \"role\": \"USER\",\n      \"createdAt\": \"2026-01-20T12:00:00.000Z\",\n      \"updatedAt\": \"2026-01-20T12:00:00.000Z\"\n    }\n  }\n}"
+                        },
+                        {
+                            "name": "Unauthorized",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/users/me",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "users",
+                                        "me"
+                                    ]
+                                }
+                            },
+                            "status": "Unauthorized",
+                            "code": 401,
+                            "_postman_previewlanguage": "json",
+                            "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Authentication required\"\n}"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Products",
+            "description": "Product management endpoints. Public read access, authenticated write access.",
+            "item": [
+                {
+                    "name": "List Products",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Products array returned', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data.products).to.be.an('array');",
+                                    "});",
+                                    "",
+                                    "pm.test('Pagination info returned', function () {",
+                                    "    const pagination = pm.response.json().data.pagination;",
+                                    "    pm.expect(pagination).to.have.property('page');",
+                                    "    pm.expect(pagination).to.have.property('limit');",
+                                    "    pm.expect(pagination).to.have.property('total');",
+                                    "    pm.expect(pagination).to.have.property('totalPages');",
+                                    "});",
+                                    "",
+                                    "// Save first product ID for later tests",
+                                    "const products = pm.response.json().data.products;",
+                                    "if (products.length > 0) {",
+                                    "    pm.collectionVariables.set('productId', products[0].id.toString());",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/products?page=1&limit=20",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "products"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number (default: 1)"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "20",
+                                    "description": "Items per page (default: 20)"
+                                }
+                            ]
+                        },
+                        "description": "Get a paginated list of all products.\n\n**Query Parameters:**\n- `page` (optional): Page number, default 1\n- `limit` (optional): Items per page, default 20\n\n**No authentication required**"
+                    },
+                    "response": [
+                        {
+                            "name": "Products List",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/products?page=1&limit=20",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "products"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "page",
+                                            "value": "1"
+                                        },
+                                        {
+                                            "key": "limit",
+                                            "value": "20"
+                                        }
+                                    ]
+                                }
+                            },
+                            "status": "OK",
+                            "code": 200,
+                            "_postman_previewlanguage": "json",
+                            "body": "{\n  \"status\": \"success\",\n  \"message\": \"Products retrieved\",\n  \"data\": {\n    \"products\": [\n      {\n        \"id\": 1,\n        \"name\": \"Premium Course\",\n        \"description\": \"Advanced programming course\",\n        \"price\": 9999,\n        \"currency\": \"usd\",\n        \"isActive\": true,\n        \"createdAt\": \"2026-01-20T12:00:00.000Z\",\n        \"updatedAt\": \"2026-01-20T12:00:00.000Z\"\n      }\n    ],\n    \"pagination\": {\n      \"page\": 1,\n      \"limit\": 20,\n      \"total\": 1,\n      \"totalPages\": 1\n    }\n  }\n}"
+                        }
+                    ]
+                },
+                {
+                    "name": "Get Product by ID",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Product data returned', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data.product).to.be.an('object');",
+                                    "    pm.expect(jsonData.data.product).to.have.property('id');",
+                                    "    pm.expect(jsonData.data.product).to.have.property('name');",
+                                    "    pm.expect(jsonData.data.product).to.have.property('price');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/products/:id",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "products",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{productId}}",
+                                    "description": "Product ID"
+                                }
+                            ]
+                        },
+                        "description": "Get a single product by its ID.\n\n**Path Parameters:**\n- `id` (required): Product ID (numeric)\n\n**No authentication required**"
+                    },
+                    "response": [
+                        {
+                            "name": "Product Found",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/products/1",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "products",
+                                        "1"
+                                    ]
+                                }
+                            },
+                            "status": "OK",
+                            "code": 200,
+                            "_postman_previewlanguage": "json",
+                            "body": "{\n  \"status\": \"success\",\n  \"message\": \"Product retrieved\",\n  \"data\": {\n    \"product\": {\n      \"id\": 1,\n      \"name\": \"Premium Course\",\n      \"description\": \"Advanced programming course\",\n      \"price\": 9999,\n      \"currency\": \"usd\",\n      \"isActive\": true,\n      \"createdAt\": \"2026-01-20T12:00:00.000Z\",\n      \"updatedAt\": \"2026-01-20T12:00:00.000Z\"\n    }\n  }\n}"
+                        },
+                        {
+                            "name": "Product Not Found",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/products/99999",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "products",
+                                        "99999"
+                                    ]
+                                }
+                            },
+                            "status": "Not Found",
+                            "code": 404,
+                            "_postman_previewlanguage": "json",
+                            "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Product not found\"\n}"
+                        }
+                    ]
+                },
+                {
+                    "name": "Create Product",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 201', function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "",
+                                    "pm.test('Product created successfully', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.status).to.eql('success');",
+                                    "    pm.expect(jsonData.data.product).to.be.an('object');",
+                                    "});",
+                                    "",
+                                    "// Save created product ID",
+                                    "if (pm.response.code === 201) {",
+                                    "    const product = pm.response.json().data.product;",
+                                    "    pm.collectionVariables.set('productId', product.id.toString());",
+                                    "    console.log('Created product ID:', product.id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"New Course\",\n  \"description\": \"A comprehensive course on modern development\",\n  \"price\": 4999,\n  \"currency\": \"usd\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/products",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "products"
+                            ]
+                        },
+                        "description": "Create a new product.\n\n**Requires:** Bearer authentication\n\n**Request Body:**\n- `name` (required): Product name (min 1 character)\n- `price` (required): Price in cents (positive integer)\n- `description` (optional): Product description\n- `currency` (optional): Currency code, default 'usd'"
+                    },
+                    "response": [
+                        {
+                            "name": "Product Created",
+                            "originalRequest": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"name\": \"New Course\",\n  \"description\": \"A comprehensive course\",\n  \"price\": 4999,\n  \"currency\": \"usd\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/products",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "products"
+                                    ]
+                                }
+                            },
+                            "status": "Created",
+                            "code": 201,
+                            "_postman_previewlanguage": "json",
+                            "body": "{\n  \"status\": \"success\",\n  \"message\": \"Product created\",\n  \"data\": {\n    \"product\": {\n      \"id\": 2,\n      \"name\": \"New Course\",\n      \"description\": \"A comprehensive course\",\n      \"price\": 4999,\n      \"currency\": \"usd\",\n      \"isActive\": true,\n      \"createdAt\": \"2026-01-20T12:00:00.000Z\",\n      \"updatedAt\": \"2026-01-20T12:00:00.000Z\"\n    }\n  }\n}"
+                        },
+                        {
+                            "name": "Unauthorized",
+                            "originalRequest": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"name\": \"New Course\",\n  \"price\": 4999\n}"
+                                },
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/products",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "products"
+                                    ]
+                                }
+                            },
+                            "status": "Unauthorized",
+                            "code": 401,
+                            "_postman_previewlanguage": "json",
+                            "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Authentication required\"\n}"
+                        }
+                    ]
+                },
+                {
+                    "name": "Update Product",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Product updated successfully', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.status).to.eql('success');",
+                                    "    pm.expect(jsonData.data.product).to.be.an('object');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Updated Course Name\",\n  \"price\": 5999,\n  \"isActive\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/products/:id",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "products",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{productId}}",
+                                    "description": "Product ID"
+                                }
+                            ]
+                        },
+                        "description": "Update an existing product.\n\n**Requires:** Bearer authentication (product owner or admin)\n\n**Path Parameters:**\n- `id` (required): Product ID\n\n**Request Body (all optional):**\n- `name`: Product name\n- `description`: Product description\n- `price`: Price in cents\n- `currency`: Currency code\n- `isActive`: Active status"
+                    },
+                    "response": [
+                        {
+                            "name": "Product Updated",
+                            "originalRequest": {
+                                "method": "PATCH",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"name\": \"Updated Course Name\",\n  \"price\": 5999\n}"
+                                },
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/products/1",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "products",
+                                        "1"
+                                    ]
+                                }
+                            },
+                            "status": "OK",
+                            "code": 200,
+                            "_postman_previewlanguage": "json",
+                            "body": "{\n  \"status\": \"success\",\n  \"message\": \"Product updated\",\n  \"data\": {\n    \"product\": {\n      \"id\": 1,\n      \"name\": \"Updated Course Name\",\n      \"description\": \"Advanced programming course\",\n      \"price\": 5999,\n      \"currency\": \"usd\",\n      \"isActive\": true,\n      \"createdAt\": \"2026-01-20T12:00:00.000Z\",\n      \"updatedAt\": \"2026-01-20T12:30:00.000Z\"\n    }\n  }\n}"
+                        }
+                    ]
+                },
+                {
+                    "name": "Delete Product",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 204', function () {",
+                                    "    pm.response.to.have.status(204);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/products/:id",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "products",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{productId}}",
+                                    "description": "Product ID"
+                                }
+                            ]
+                        },
+                        "description": "Delete a product.\n\n**Requires:** Bearer authentication with **ADMIN** role\n\n**Path Parameters:**\n- `id` (required): Product ID"
+                    },
+                    "response": [
+                        {
+                            "name": "Product Deleted",
+                            "originalRequest": {
+                                "method": "DELETE",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/products/1",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "products",
+                                        "1"
+                                    ]
+                                }
+                            },
+                            "status": "No Content",
+                            "code": 204,
+                            "_postman_previewlanguage": "text",
+                            "body": ""
+                        },
+                        {
+                            "name": "Forbidden - Admin Only",
+                            "originalRequest": {
+                                "method": "DELETE",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/products/1",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "products",
+                                        "1"
+                                    ]
+                                }
+                            },
+                            "status": "Forbidden",
+                            "code": 403,
+                            "_postman_previewlanguage": "json",
+                            "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Admin access required\"\n}"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Orders",
+            "description": "Order management with Stripe Checkout integration.",
+            "item": [
+                {
+                    "name": "Create Order",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 201', function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "",
+                                    "pm.test('Order created with checkout URL', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.status).to.eql('success');",
+                                    "    pm.expect(jsonData.data.order).to.be.an('object');",
+                                    "    pm.expect(jsonData.data.sessionId).to.be.a('string');",
+                                    "});",
+                                    "",
+                                    "pm.test('Order has correct status', function () {",
+                                    "    const order = pm.response.json().data.order;",
+                                    "    pm.expect(order.status).to.eql('PENDING');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"items\": [\n    {\n      \"productId\": 1,\n      \"quantity\": 1\n    }\n  ]\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/orders",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "orders"
+                            ]
+                        },
+                        "description": "Create a new order and get a Stripe Checkout session URL.\n\n**Requires:** Bearer authentication\n\n**Request Body:**\n- `items` (required): Array of order items, each with:\n  - `productId` (required): Product ID (positive integer)\n  - `quantity` (required): Quantity (positive integer)\n\n**Response:**\n- Order details with PENDING status\n- Stripe session ID\n- Checkout URL to redirect user for payment"
+                    },
+                    "response": [
+                        {
+                            "name": "Order Created",
+                            "originalRequest": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"items\": [\n    {\"productId\": 1, \"quantity\": 1}\n  ]\n}"
+                                },
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/orders",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "orders"
+                                    ]
+                                }
+                            },
+                            "status": "Created",
+                            "code": 201,
+                            "_postman_previewlanguage": "json",
+                            "body": "{\n  \"status\": \"success\",\n  \"message\": \"Order created\",\n  \"data\": {\n    \"order\": {\n      \"id\": 1,\n      \"userId\": 1,\n      \"status\": \"PENDING\",\n      \"totalAmount\": 4999\n    },\n    \"sessionId\": \"cs_test_a1b2c3d4e5f6g7h8i9j0...\",\n    \"url\": \"https://checkout.stripe.com/c/pay/cs_test_...\"\n  }\n}"
+                        },
+                        {
+                            "name": "Invalid Products",
+                            "originalRequest": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"items\": [\n    {\"productId\": 99999, \"quantity\": 1}\n  ]\n}"
+                                },
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/orders",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "orders"
+                                    ]
+                                }
+                            },
+                            "status": "Bad Request",
+                            "code": 400,
+                            "_postman_previewlanguage": "json",
+                            "body": "{\n  \"status\": \"fail\",\n  \"message\": \"One or more products not found\"\n}"
+                        },
+                        {
+                            "name": "Unauthorized",
+                            "originalRequest": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"items\": [\n    {\"productId\": 1, \"quantity\": 1}\n  ]\n}"
+                                },
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/orders",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "orders"
+                                    ]
+                                }
+                            },
+                            "status": "Unauthorized",
+                            "code": 401,
+                            "_postman_previewlanguage": "json",
+                            "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Authentication required\"\n}"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Payments",
+            "description": "Payment callback endpoints for Stripe redirect handling.",
+            "item": [
+                {
+                    "name": "Payment Success",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/payment/success",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "payment",
+                                "success"
+                            ]
+                        },
+                        "description": "Success callback page after completing Stripe Checkout.\n\n**Note:** This is a redirect target from Stripe, not typically called directly."
+                    },
+                    "response": [
+                        {
+                            "name": "Success Page",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/payment/success",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "payment",
+                                        "success"
+                                    ]
+                                }
+                            },
+                            "status": "OK",
+                            "code": 200,
+                            "_postman_previewlanguage": "text",
+                            "body": "Payment successful! Thank you for your purchase."
+                        }
+                    ]
+                },
+                {
+                    "name": "Payment Cancel",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/payment/cancel",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "payment",
+                                "cancel"
+                            ]
+                        },
+                        "description": "Cancel callback page when user cancels Stripe Checkout.\n\n**Note:** This is a redirect target from Stripe, not typically called directly."
+                    },
+                    "response": [
+                        {
+                            "name": "Cancel Page",
+                            "originalRequest": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/payment/cancel",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "payment",
+                                        "cancel"
+                                    ]
+                                }
+                            },
+                            "status": "OK",
+                            "code": 200,
+                            "_postman_previewlanguage": "text",
+                            "body": "Payment cancelled. You can try again later."
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Webhooks",
+            "description": "Webhook endpoints for external service integration.",
+            "item": [
+                {
+                    "name": "Stripe Webhook",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Stripe-Signature",
+                                "value": "t=1234567890,v1=...",
+                                "description": "Stripe signature header (required for verification)"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"id\": \"evt_test_webhook\",\n  \"type\": \"checkout.session.completed\",\n  \"data\": {\n    \"object\": {\n      \"id\": \"cs_test_...\",\n      \"metadata\": {\n        \"orderId\": \"1\"\n      }\n    }\n  }\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/webhooks/stripe",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "webhooks",
+                                "stripe"
+                            ]
+                        },
+                        "description": "Stripe webhook endpoint for payment event notifications.\n\n**Note:** This endpoint requires a valid Stripe signature header. For local testing, use Stripe CLI:\n\n```bash\nstripe listen --forward-to localhost:3000/api/webhooks/stripe\n```\n\n**Handled Events:**\n- `checkout.session.completed` → Order status → PAID\n- `checkout.session.expired` → Order status → CANCELLED\n\n**Security:** Signature verification required - cannot be tested directly in Postman without a valid signature."
+                    },
+                    "response": [
+                        {
+                            "name": "Webhook Received",
+                            "originalRequest": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Stripe-Signature",
+                                        "value": "t=...,v1=..."
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{...}"
+                                },
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/webhooks/stripe",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "webhooks",
+                                        "stripe"
+                                    ]
+                                }
+                            },
+                            "status": "OK",
+                            "code": 200,
+                            "_postman_previewlanguage": "json",
+                            "body": "{\n  \"received\": true\n}"
+                        }
+                    ]
+                }
+            ]
         }
     ]
 }
