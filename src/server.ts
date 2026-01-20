@@ -36,10 +36,8 @@ async function bootstrap(): Promise<void> {
     }
 }
 
-// Only start the server when running locally (not in serverless environment)
 if (!process.env['VERCEL']) {
     bootstrap();
 }
 
-// Export the app for Vercel serverless functions
 export default app;
