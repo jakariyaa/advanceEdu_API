@@ -19,4 +19,4 @@ export const loginSchema = z.object({
     }),
 });
 
-// Password complexity: min 8 chars, 1 number
+

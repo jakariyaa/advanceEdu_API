@@ -33,10 +33,25 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/api', csrfProtection, routes);
 
+app.get('/', (_req, res) => {
+    res.status(200).json({
+        message: 'Welcome to AdvanceEdu E-commerce API',
+        version: '1.0.0',
+        docs: '/api/health',
+        endpoints: {
+            health: '/api/health',
+            auth: '/api/auth',
+            users: '/api/users',
+            products: '/api/products',
+            orders: '/api/orders',
+        },
+    });
+});
+
 app.use(errorHandler);
 
 export default app;
 
-// Optimized imports
 
-// Added health check endpoint
+
+

@@ -9,7 +9,7 @@
     "variable": [
         {
             "key": "baseUrl",
-            "value": "http://localhost:3000",
+            "value": "https://advance-edu-api.vercel.app",
             "type": "string",
             "description": "API base URL"
         },

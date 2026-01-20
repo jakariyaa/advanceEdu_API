@@ -30,11 +30,11 @@ model User {
 
 model RefreshToken {
   id        Int      @id @default(autoincrement())
-  token     String   @unique // Hashed token
+  token     String   @unique 
   userId    Int      @map("user_id")
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  familyId  String   @map("family_id") // ID for the token family/chain
-  isUsed    Boolean  @default(false) @map("is_used") // Track if token has been rotated
+  familyId  String   @map("family_id") 
+  isUsed    Boolean  @default(false) @map("is_used") 
   expiresAt DateTime @map("expires_at")
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -48,13 +48,13 @@ model Product {
   id          Int      @id @default(autoincrement())
   name        String
   description String?
-  price       Int      // in cents
+  price       Int      
   currency    String   @default("usd")
   stripeId    String?  @unique @map("stripe_price_id")
   isActive    Boolean  @default(true) @map("is_active")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
-  userId      Int      @map("user_id") @default(1) // Temporary default for migration
+  userId      Int      @map("user_id") @default(1) 
   user        User     @relation(fields: [userId], references: [id])
   orderItems  OrderItem[]
   
@@ -66,7 +66,7 @@ model Order {
   userId          Int         @map("user_id")
   user            User        @relation(fields: [userId], references: [id])
   status          OrderStatus @default(PENDING)
-  totalAmount     Int         @map("total_amount") // in cents
+  totalAmount     Int         @map("total_amount") 
   currency        String      @default("usd")
   stripeSessionId String?     @unique @map("stripe_session_id")
   stripePaymentId String?     @map("stripe_payment_intent_id")
@@ -84,7 +84,7 @@ model OrderItem {
   productId Int     @map("product_id")
   product   Product @relation(fields: [productId], references: [id])
   quantity  Int
-  price     Int     // price at time of order, in cents
+  price     Int     
   
   @@map("order_items")
 }
@@ -97,4 +97,4 @@ enum OrderStatus {
   REFUNDED
 }
 
-// Index added for product search optimization
+

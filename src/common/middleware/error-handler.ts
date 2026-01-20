@@ -121,4 +121,4 @@ export const errorHandler = (
     res.status(500).json(response);
 };
 
-// Fixed typo in error msg
+

@@ -30,7 +30,7 @@ const CSRF_EXEMPT_PATHS = [
  * 2. Send it in the x-csrf-token header for state-changing requests
  */
 export const csrfProtection = (req: Request, res: Response, next: NextFunction): void => {
-    // Skip CSRF protection in development mode for easier local testing
+
     if (process.env['NODE_ENV'] === 'development') {
         return next();
     }

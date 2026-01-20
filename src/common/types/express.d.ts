@@ -14,4 +14,4 @@ declare global {
     }
 }
 
-// Standardized error response interface
+

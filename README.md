@@ -137,7 +137,7 @@ Server runs at `http://localhost:3000`
 
 ### Base URL
 - **Local**: `http://localhost:3000/api`
-- **Production**: `https://your-app.vercel.app/api`
+- **Production**: `https://advance-edu-api.vercel.app/api`
 
 ### Authentication
 

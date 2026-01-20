@@ -79,4 +79,4 @@ export const logoutAll = asyncHandler(async (req: Request, res: Response) => {
     });
 });
 
-// Improved error handling
+

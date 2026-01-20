@@ -4,7 +4,7 @@ import request from 'supertest';
 import cookieParser from 'cookie-parser';
 import { ApiError } from '../../src/common/middleware/error-handler';
 
-// Unmock the middleware to test the real implementation
+
 vi.unmock('../../src/common/middleware/csrf.middleware');
 
 import { csrfProtection } from '../../src/common/middleware/csrf.middleware';
@@ -18,7 +18,7 @@ describe('CSRF Protection Middleware', () => {
         app.use(cookieParser());
         app.use(express.json());
 
-        // Setup a simple route with CSRF protection
+
         app.get('/api/protected', csrfProtection, (req, res) => {
             res.json({ message: 'success' });
         });
@@ -27,7 +27,7 @@ describe('CSRF Protection Middleware', () => {
             res.json({ message: 'created' });
         });
 
-        // Error handler to catch ApiError
+
         app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
             if (err instanceof ApiError) {
                 return res.status(err.statusCode).json({ message: err.message });
@@ -51,12 +51,12 @@ describe('CSRF Protection Middleware', () => {
     });
 
     it('should fail POST request with mismatching tokens', async () => {
-        // First get a token
+
         const getResponse = await request(app).get('/api/protected');
         const cookie = getResponse.headers['set-cookie'][0];
 
-        // Extract token from cookie (simple extraction for test)
-        // cookie format: csrf-token=xyz; Path=/; ...
+
+
         const token = cookie.split(';')[0].split('=')[1];
 
         const response = await request(app)
@@ -69,7 +69,7 @@ describe('CSRF Protection Middleware', () => {
     });
 
     it('should pass POST request with matching tokens', async () => {
-        // First get a token
+
         const getResponse = await request(app).get('/api/protected');
         const cookie = getResponse.headers['set-cookie'][0];
         const token = cookie.split(';')[0].split('=')[1];
