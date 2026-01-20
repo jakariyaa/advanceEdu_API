@@ -1,12 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
 import { ApiError } from './error-handler';
 import { prisma } from '../lib/prisma';
-
-interface JwtPayload {
-    userId: number;
-    email: string;
-}
+import { tokenService } from '../lib/token.service';
 
 export const authenticate = async (
     req: Request,
@@ -27,12 +22,7 @@ export const authenticate = async (
         }
 
         try {
-            const jwtSecret = process.env['JWT_SECRET'];
-            if (!jwtSecret) {
-                throw new ApiError(500, 'JWT secret not configured');
-            }
-
-            const decoded = jwt.verify(token, jwtSecret) as unknown as JwtPayload;
+            const decoded = tokenService.verifyAccessToken(token);
 
             const user = await prisma.user.findUnique({
                 where: { id: decoded.userId },
@@ -46,12 +36,13 @@ export const authenticate = async (
                 userId: user.id,
                 email: user.email,
                 name: user.name ?? null,
+                role: user.role,
                 stripeId: user.stripeId ?? null
             };
 
             next();
-        } catch (_error) {
-            throw new ApiError(401, 'Invalid token');
+        } catch {
+            throw new ApiError(401, 'Invalid or expired token');
         }
     } catch (error) {
         next(error);
